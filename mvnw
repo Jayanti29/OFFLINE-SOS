@@ -12,3 +12,4 @@ if [ ! -x "$MAVEN_HOME/bin/mvn" ]; then
   fi
   mkdir -p "$BASE_DIR/.mvn"
   tar -xzf "$ARCHIVE" -C "$BASE_DIR/.mvn"
+fi
