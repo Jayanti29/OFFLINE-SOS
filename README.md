@@ -13,3 +13,4 @@ mvn clean test
 mvn javafx:run
 ```
 
+The included demo graph is explicitly **SYNTHETIC TEST DATA - NOT REAL-WORLD DATA**. Replace it only through a documented import pipeline with sourced data before using geographic claims.
