@@ -15,3 +15,4 @@ import javafx.stage.Stage;
 
 public final class Main extends Application {
     private final Graph graph = demoGraph();
+    private final RouteFinder routeFinder = new RouteFinder();
