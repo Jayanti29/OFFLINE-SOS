@@ -8,3 +8,4 @@
 .map { -fx-background-color: #dfe9df; -fx-background-radius: 10px; -fx-padding: 28px; -fx-font-size: 16px; -fx-text-fill: #30573b; -fx-border-color: #bdcfbd; -fx-border-radius: 10px; }
 .label { -fx-text-fill: #536158; -fx-font-size: 12px; -fx-font-weight: bold; }
 .combo-box { -fx-pref-height: 44px; }
+.button { -fx-cursor: hand; }
