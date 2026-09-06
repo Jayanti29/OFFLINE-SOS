@@ -8,3 +8,4 @@ class GraphEdgeTest {
     @Test void safetyCostCombinesDistanceAndRisk() {
         GraphEdge edge = new GraphEdge(2, 200, 25);
 
+        assertEquals(250, edge.safetyCost());
