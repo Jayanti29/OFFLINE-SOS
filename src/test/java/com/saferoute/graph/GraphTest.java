@@ -7,3 +7,4 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GraphTest {
     @Test void roadsAreAvailableInBothDirections() {
+        Graph graph = new Graph();
