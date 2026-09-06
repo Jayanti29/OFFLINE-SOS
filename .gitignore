@@ -2,3 +2,4 @@ target/
 .mvn/apache-maven-*/
 *.db
 *.sqlite
+.idea/
