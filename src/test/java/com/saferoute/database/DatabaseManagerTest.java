@@ -7,3 +7,4 @@ import static org.junit.jupiter.api.Assertions.*;
 class DatabaseManagerTest {
     @Test void initializesSchemaAndEnablesForeignKeys() throws Exception {
         var path = Files.createTempFile("saferoute", ".db");
+        try (var database = new DatabaseManager(path)) {
