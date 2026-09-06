@@ -13,6 +13,16 @@ mvn clean test
 mvn javafx:run
 ```
 
+The web dashboard is in `web/` and uses real OpenStreetMap tiles through Leaflet. It does not require a map key for the base map; live transit directions open through Google Maps.
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Open `http://127.0.0.1:5173/` in a browser. Browser location requires permission and network access. Firebase, routing-provider, and production authentication credentials are intentionally not committed.
+
 The included demo graph is explicitly **SYNTHETIC TEST DATA - NOT REAL-WORLD DATA**. Replace it only through a documented import pipeline with sourced data before using geographic claims.
 
 ## Architecture

@@ -6,3 +6,6 @@ target/
 .vscode/settings.json
 .DS_Store
 .env
+.env.*
+web/node_modules/
+web/dist/
