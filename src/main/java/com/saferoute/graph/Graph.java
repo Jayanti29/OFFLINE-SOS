@@ -8,3 +8,4 @@ public final class Graph {
 
     public void addNode(long id) { adjacency.computeIfAbsent(id, ignored -> new ArrayList<>()); }
 
+    public void addRoad(Road road) {
