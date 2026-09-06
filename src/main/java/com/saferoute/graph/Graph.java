@@ -5,3 +5,4 @@ import java.util.*;
 
 public final class Graph {
     private final Map<Long, List<GraphEdge>> adjacency = new HashMap<>();
+
