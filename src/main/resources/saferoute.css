@@ -2,3 +2,4 @@
 .eyebrow { -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #53705b; }
 .brand { -fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #17231d; }
 .offline { -fx-text-fill: #9a5b18; -fx-font-weight: bold; -fx-font-size: 12px; }
+.panel { -fx-background-color: white; -fx-background-radius: 10px; -fx-padding: 18px; -fx-border-color: #dce5dc; -fx-border-radius: 10px; }
