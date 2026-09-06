@@ -9,3 +9,4 @@ if [ ! -x "$MAVEN_HOME/bin/mvn" ]; then
   mkdir -p "$CACHE_DIR"
   if [ ! -f "$ARCHIVE" ]; then
     curl -fsSL "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/$MAVEN_VERSION/apache-maven-$MAVEN_VERSION-bin.tar.gz" -o "$ARCHIVE"
+  fi
