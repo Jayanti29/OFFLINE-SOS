@@ -15,3 +15,4 @@ public final class DatabaseManager implements AutoCloseable {
         initialize();
     }
 
+    private void initialize() throws SQLException {
