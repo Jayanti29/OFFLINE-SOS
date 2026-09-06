@@ -15,3 +15,4 @@ public final class RouteFinder {
         return find(graph, start, destination, GraphEdge::safetyCost, "SAFEST");
     }
 
+    public Route findBalancedRoute(Graph graph, long start, long destination) {
