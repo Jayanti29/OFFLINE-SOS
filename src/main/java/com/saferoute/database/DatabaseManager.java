@@ -10,3 +10,4 @@ public final class DatabaseManager implements AutoCloseable {
         connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath.toAbsolutePath());
         try (Statement statement = connection.createStatement()) {
             statement.execute("PRAGMA foreign_keys = ON");
+            statement.execute("PRAGMA busy_timeout = 5000");
