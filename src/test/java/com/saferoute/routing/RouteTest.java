@@ -15,3 +15,4 @@ class RouteTest {
 
         assertEquals(List.of(1L, 2L), route.locationIds());
         assertEquals(100, route.distanceMeters());
+        assertEquals(75, route.safetyScore());
