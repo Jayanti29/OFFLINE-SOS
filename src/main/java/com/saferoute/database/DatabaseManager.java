@@ -8,3 +8,4 @@ public final class DatabaseManager implements AutoCloseable {
 
     public DatabaseManager(Path databasePath) throws SQLException {
         connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath.toAbsolutePath());
+        try (Statement statement = connection.createStatement()) {
