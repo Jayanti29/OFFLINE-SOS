@@ -4,3 +4,4 @@ SafeRoute is an offline-first JavaFX prototype for route planning during stressf
 
 > Safety scores are application-defined algorithmic outputs based on available data. They are not official safety ratings and do not guarantee personal safety. In a real emergency, contact the appropriate emergency services.
 
+## Run
