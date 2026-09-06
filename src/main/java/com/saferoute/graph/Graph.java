@@ -10,3 +10,4 @@ public final class Graph {
 
     public void addRoad(Road road) {
         addNode(road.fromLocationId());
+        addNode(road.toLocationId());
