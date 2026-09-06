@@ -11,3 +11,4 @@ public final class RouteFinder {
         return find(graph, start, destination, GraphEdge::distanceMeters, "SHORTEST");
     }
 
+    public Route findSafestRoute(Graph graph, long start, long destination) {
