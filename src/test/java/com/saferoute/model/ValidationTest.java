@@ -10,3 +10,4 @@ class ValidationTest {
     }
 
     @Test void rejectsNegativeDistance() {
+        assertThrows(IllegalArgumentException.class, () -> new Road(1, 1, 2, -1, 0));
