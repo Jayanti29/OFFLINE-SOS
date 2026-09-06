@@ -14,3 +14,4 @@ class GraphTest {
         assertTrue(graph.contains(2));
         assertEquals(2, graph.edgesFrom(1).size() + graph.edgesFrom(2).size());
         assertEquals(2, graph.edgesFrom(1).get(0).targetId());
+        assertEquals(1, graph.edgesFrom(2).get(0).targetId());
