@@ -1,6 +1,7 @@
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from 'firebase/auth'
 import { useEffect, useMemo, useState } from 'react'
-import { CircleMarker, MapContainer, Polyline, Popup, TileLayer, useMap } from 'react-leaflet'
+import { CircleMarker, MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from 'react-leaflet'
+import { divIcon } from 'leaflet'
 import type { LatLngExpression } from 'leaflet'
 import { firebaseAuth, firebaseConfigured } from './firebase'
 import 'leaflet/dist/leaflet.css'
@@ -14,6 +15,20 @@ type Place = {
   position: [number, number]
   detail: string
 }
+
+type DirectoryEntry = { name: string; category: string; number: string; source: string; url: string }
+
+const directory: DirectoryEntry[] = [
+  { name: 'Unified emergency', category: 'Emergency', number: '112', source: 'Government of India ERSS', url: 'https://112.gov.in/' },
+  { name: 'Police emergency', category: 'Police', number: '100', source: 'Karnataka Police', url: 'https://ksp.karnataka.gov.in/' },
+  { name: 'Ambulance emergency', category: 'Medical', number: '108', source: 'Karnataka emergency health services', url: 'https://hfwcom.karnataka.gov.in/' },
+  { name: 'Fire emergency', category: 'Fire', number: '101', source: 'Karnataka Fire and Emergency Services', url: 'https://ksfes.karnataka.gov.in/' },
+]
+
+const transitCandidates = [
+  { number: '285M', label: 'BMTC route candidate' },
+  { number: 'V285M', label: 'BMTC route candidate' },
+]
 
 const origin: Place = {
   name: 'Provident Wellworth City',
@@ -81,6 +96,8 @@ function SafeRouteDashboard() {
   const [authError, setAuthError] = useState('')
   const [profileImage, setProfileImage] = useState('')
   const [mapStyle, setMapStyle] = useState<'normal' | 'satellite'>('normal')
+  const [accuracy, setAccuracy] = useState<number | null>(null)
+  const [transitOpen, setTransitOpen] = useState(false)
 
   useEffect(() => {
     if (!firebaseAuth) return undefined
@@ -89,6 +106,27 @@ function SafeRouteDashboard() {
       setAuthReady(true)
     })
   }, [])
+
+  useEffect(() => {
+    if (!online || !navigator.geolocation) return undefined
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        setLocation([position.coords.latitude, position.coords.longitude])
+        setAccuracy(position.coords.accuracy)
+        setLocationLabel('Current device location')
+      },
+      () => setNotice('Live location updates stopped. Check browser location permission.'),
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 },
+    )
+    return () => navigator.geolocation.clearWatch(watchId)
+  }, [online])
+
+  const buildingIcon = (category: PlaceCategory) => divIcon({
+    className: `building-marker building-${category}`,
+    html: `<span>${category === 'hospital' ? '+' : category === 'police' ? 'P' : category === 'fire' ? 'F' : '◆'}</span>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+  })
 
   const mapCenter = useMemo<[number, number]>(() => [location[0], location[1]], [location])
   const liveTransitUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(locationLabel)}&destination=${encodeURIComponent(destinationInput)}&travelmode=transit`
@@ -152,6 +190,7 @@ function SafeRouteDashboard() {
       (position) => {
         const next: [number, number] = [position.coords.latitude, position.coords.longitude]
         setLocation(next)
+        setAccuracy(position.coords.accuracy)
         setLocationLabel('Current device location')
         setOnline(true)
         setNotice('Browser location detected with permission. It is used only in this session.')
@@ -167,8 +206,8 @@ function SafeRouteDashboard() {
       return
     }
     if (routeMode === 'transit') {
-      window.open(liveTransitUrl, '_blank', 'noopener,noreferrer')
-      setNotice('Live public transport directions opened in Google Maps. Transit data is supplied by Google, not this app.')
+      setTransitOpen(true)
+      setNotice('Transit details are shown below. BMTC route numbers must be verified against the official live feed before travel.')
       return
     }
     setRouteVisible(true)
@@ -233,7 +272,7 @@ function SafeRouteDashboard() {
       </section>
 
       <section className="metric-grid" aria-label="Dashboard summary">
-        <article className="metric-card"><span className="metric-label">CURRENT POSITION</span><strong>{locationLabel}</strong><small>{online ? 'Browser permission active' : 'Local reference point'}</small></article>
+        <article className="metric-card"><span className="metric-label">CURRENT POSITION</span><strong>{locationLabel}</strong><small>{online ? `Browser permission active${accuracy ? ` · ±${Math.round(accuracy)}m` : ''}` : 'Local reference point'}</small></article>
         <article className="metric-card"><span className="metric-label">NEARBY SUPPORT</span><strong>9 reference points</strong><small>3 hospitals · 2 police · 1 fire</small></article>
         <article className="metric-card"><span className="metric-label">PROFILE STATUS</span><strong>Local mode active</strong><small>Firebase Auth can be connected later</small></article>
       </section>
@@ -249,8 +288,8 @@ function SafeRouteDashboard() {
               <MapViewport center={mapCenter} />
               <TileLayer attribution={tileAttribution} url={tileUrl} />
               {routeVisible && <Polyline positions={routeWaypoints} pathOptions={{ color: '#d64a43', weight: 5, opacity: 0.9 }} />}
-              <CircleMarker center={location} radius={9} pathOptions={{ color: '#fff', weight: 3, fillColor: '#1f8a70', fillOpacity: 1 }}><Popup>Current reference: {locationLabel}</Popup></CircleMarker>
-              {places.filter((place) => place.name !== origin.name).map((place) => <CircleMarker key={place.name} center={place.position} radius={7} pathOptions={{ color: '#fff', weight: 2, fillColor: markerColor[place.category], fillOpacity: 1 }}><Popup><strong>{place.name}</strong><br />{place.detail}<br /><small>Verify availability before relying on this point.</small></Popup></CircleMarker>)}
+              <CircleMarker center={location} radius={9} pathOptions={{ color: '#fff', weight: 3, fillColor: '#1f8a70', fillOpacity: 1 }}><Popup>Current reference: {locationLabel}{accuracy ? ` (${Math.round(accuracy)}m accuracy)` : ''}</Popup></CircleMarker>
+              {places.filter((place) => place.name !== origin.name).map((place) => place.category === 'hospital' || place.category === 'police' || place.category === 'fire' ? <Marker key={place.name} position={place.position} icon={buildingIcon(place.category)}><Popup><strong>{place.name}</strong><br />{place.detail}<br /><small>Verify availability before relying on this point.</small></Popup></Marker> : <CircleMarker key={place.name} center={place.position} radius={7} pathOptions={{ color: '#fff', weight: 2, fillColor: markerColor[place.category], fillOpacity: 1 }}><Popup><strong>{place.name}</strong><br />{place.detail}<br /><small>Verify availability before relying on this point.</small></Popup></CircleMarker>)}
             </MapContainer>
             <div className="map-badge">{mapTilerKey ? 'MAPTILER TILES · NETWORK REQUIRED' : 'OSM TILES · NETWORK REQUIRED'}</div>
           </div>
@@ -271,9 +310,11 @@ function SafeRouteDashboard() {
             <button className="button button-quiet full-button" type="button" onClick={getRouteBrief}>Ask route assistant</button>
             <p className="helper">Transit opens a live Google Maps handoff. Safest and shortest use the local routing model until a routing provider is connected.</p>
           </section>
-          <section className="control-card nearby-card"><div className="panel-heading compact"><div><p className="eyebrow">NEARBY DIRECTORY</p><h3>Emergency contacts</h3></div><span className="directory-state">Reference</span></div><div className="contact-list"><a href="tel:112"><span className="contact-icon alert-icon">!</span><span><strong>112</strong><small>India unified emergency number</small></span><span className="call-arrow">↗</span></a><a href="tel:100"><span className="contact-icon police-icon">P</span><span><strong>100</strong><small>Police emergency line</small></span><span className="call-arrow">↗</span></a><a href="tel:108"><span className="contact-icon hospital-icon">+</span><span><strong>108</strong><small>Ambulance emergency line</small></span><span className="call-arrow">↗</span></a></div><p className="helper">Directory numbers are general references. The app cannot verify who is physically present at a location.</p></section>
+          <section className="control-card nearby-card"><div className="panel-heading compact"><div><p className="eyebrow">NEARBY DIRECTORY</p><h3>Emergency contacts</h3></div><span className="directory-state">Official sources</span></div><div className="contact-list">{directory.map((entry) => <div className="contact-row" key={entry.number}><span className={`contact-icon ${entry.category === 'Police' ? 'police-icon' : entry.category === 'Medical' ? 'hospital-icon' : 'alert-icon'}`}>{entry.category === 'Police' ? 'P' : entry.category === 'Medical' ? '+' : '!'}</span><span><strong>{entry.number}</strong><small>{entry.name} · {entry.source}</small></span><span className="contact-actions"><a href={`tel:${entry.number}`} aria-label={`Call ${entry.name}`}>Call</a><a href={entry.url} target="_blank" rel="noreferrer" aria-label={`Open ${entry.source}`}>Source</a></span></div>)}</div><p className="helper">Numbers and sources are published references. The app cannot verify who is physically present at a location.</p></section>
         </aside>
       </section>
+
+      {transitOpen && <section className="transit-card"><div><p className="eyebrow">PUBLIC TRANSPORT</p><h3>BMTC route candidates</h3><p>Bus icon routes below came from the requested route numbers. Verify live operation, stop sequence, and service status using BMTC before travel.</p></div><div className="bus-list">{transitCandidates.map((bus) => <div className="bus-row" key={bus.number}><span className="bus-icon">▣</span><strong>{bus.number}</strong><small>{bus.label} · unverified live status</small></div>)}</div><a className="button button-secondary" href="https://mybmtc.karnataka.gov.in/" target="_blank" rel="noreferrer">Open official BMTC source</a><a className="button button-primary" href={liveTransitUrl} target="_blank" rel="noreferrer">Open live transit directions</a></section>}
 
       <section className="status-strip"><span className="status-dot" />{alertSent ? 'Emergency alert prepared locally.' : notice}<span className="status-note">No unsupported safety claims · no live dispatch</span></section>
       <footer>Map data © OpenStreetMap contributors · This prototype requires a network for map tiles and live transit handoff.</footer>
