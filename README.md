@@ -11,3 +11,4 @@ Requirements: Java 25+ and Maven 3.9+.
 ```bash
 mvn clean test
 mvn javafx:run
+```
