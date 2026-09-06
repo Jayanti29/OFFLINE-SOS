@@ -9,3 +9,4 @@ class ValidationTest {
         assertThrows(IllegalArgumentException.class, () -> new Location(1, "x", 0, 181));
     }
 
+    @Test void rejectsNegativeDistance() {
