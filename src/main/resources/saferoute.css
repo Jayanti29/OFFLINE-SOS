@@ -1,4 +1,5 @@
 .root { -fx-font-family: 'Avenir Next'; -fx-background-color: #f5f7f4; -fx-text-fill: #17231d; }
+.root { -fx-font-family: 'Avenir Next'; -fx-background-color: #f5f7f4; -fx-text-fill: #17231d; }
 .eyebrow { -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #53705b; }
 .brand { -fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #17231d; }
 .offline { -fx-text-fill: #9a5b18; -fx-font-weight: bold; -fx-font-size: 12px; }
@@ -6,9 +7,15 @@
 .location { -fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #17231d; }
 .muted { -fx-font-size: 12px; -fx-text-fill: #68756d; }
 .map { -fx-background-color: #dfe9df; -fx-background-radius: 10px; -fx-padding: 28px; -fx-font-size: 16px; -fx-text-fill: #30573b; -fx-border-color: #bdcfbd; -fx-border-radius: 10px; }
+.map-frame { -fx-background-color: #e6eee4; -fx-background-radius: 10px; -fx-border-color: #bdcfbd; -fx-border-radius: 10px; -fx-min-height: 390px; }
+.map-title { -fx-background-color: rgba(255,255,255,0.88); -fx-background-radius: 6px; -fx-padding: 8px 10px; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #30573b; }
 .label { -fx-text-fill: #536158; -fx-font-size: 12px; -fx-font-weight: bold; }
 .combo-box { -fx-pref-height: 44px; }
 .button { -fx-cursor: hand; }
 .emergency { -fx-background-color: #b62e2e; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 15px; -fx-background-radius: 8px; }
 .emergency:focused { -fx-border-color: #17231d; -fx-border-width: 3px; }
+.sos { -fx-background-color: #b62e2e; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10px 16px; -fx-background-radius: 20px; }
+.sos:hover, .emergency:hover { -fx-background-color: #8f2323; }
+.support-list { -fx-padding: 2px 0 2px 0; }
+.support-chip { -fx-background-color: #edf4ed; -fx-background-radius: 6px; -fx-border-color: #d5e2d5; -fx-border-radius: 6px; -fx-padding: 8px 10px; -fx-font-size: 11px; -fx-text-fill: #31533a; }
 .result { -fx-background-color: #edf4ed; -fx-background-radius: 10px; -fx-padding: 18px; -fx-font-size: 14px; -fx-text-fill: #24492e; }
