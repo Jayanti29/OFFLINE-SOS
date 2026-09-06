@@ -15,3 +15,4 @@ class RouteFinderTest {
         return graph;
     }
 
+    @Test void shortestRouteUsesDistance() {
