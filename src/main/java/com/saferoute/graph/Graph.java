@@ -12,3 +12,4 @@ public final class Graph {
         addNode(road.fromLocationId());
         addNode(road.toLocationId());
         adjacency.get(road.fromLocationId()).add(new GraphEdge(road.toLocationId(), road.distanceMeters(), road.riskScore()));
+        adjacency.get(road.toLocationId()).add(new GraphEdge(road.fromLocationId(), road.distanceMeters(), road.riskScore()));
