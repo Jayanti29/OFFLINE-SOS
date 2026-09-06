@@ -11,3 +11,4 @@ class GraphTest {
         graph.addRoad(new Road(1, 1, 2, 125, 20));
 
         assertTrue(graph.contains(1));
+        assertTrue(graph.contains(2));
