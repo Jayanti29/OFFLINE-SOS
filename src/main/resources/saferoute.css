@@ -1,2 +1,3 @@
 .root { -fx-font-family: 'Avenir Next'; -fx-background-color: #f5f7f4; -fx-text-fill: #17231d; }
 .eyebrow { -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #53705b; }
+.brand { -fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #17231d; }
