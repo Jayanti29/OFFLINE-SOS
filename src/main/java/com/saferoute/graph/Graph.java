@@ -16,3 +16,5 @@ public final class Graph {
     }
 
     public List<GraphEdge> edgesFrom(long id) { return List.copyOf(adjacency.getOrDefault(id, List.of())); }
+    public boolean contains(long id) { return adjacency.containsKey(id); }
+}

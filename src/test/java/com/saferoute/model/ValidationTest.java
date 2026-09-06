@@ -16,3 +16,13 @@ class ValidationTest {
     @Test void rejectsInvalidLocationAndRoadValues() {
         assertThrows(IllegalArgumentException.class, () -> new Location(1, "", 0, 0));
         assertThrows(IllegalArgumentException.class, () -> new Road(1, 1, 1, 1, 0));
+        assertThrows(IllegalArgumentException.class, () -> new Road(1, 1, 2, 1, 101));
+    }
+
+    @Test void validatesSafePointName() {
+        SafePoint safePoint = new SafePoint(1, 2, "Security Desk", "SECURITY");
+
+        assertEquals("Security Desk", safePoint.name());
+        assertThrows(IllegalArgumentException.class, () -> new SafePoint(1, 2, " ", "SECURITY"));
+    }
+}

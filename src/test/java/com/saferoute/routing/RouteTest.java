@@ -16,3 +16,11 @@ class RouteTest {
         assertEquals(List.of(1L, 2L), route.locationIds());
         assertEquals(100, route.distanceMeters());
         assertEquals(75, route.safetyScore());
+        assertEquals("SAFE", route.preference());
+        assertThrows(UnsupportedOperationException.class, () -> route.locationIds().add(3L));
+    }
+
+    @Test void rejectsEmptyRoutes() {
+        assertThrows(IllegalArgumentException.class, () -> new Route(List.of(), 0, 100, "SHORTEST"));
+    }
+}

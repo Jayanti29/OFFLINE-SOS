@@ -16,3 +16,14 @@ class GraphTest {
         assertEquals(2, graph.edgesFrom(1).get(0).targetId());
         assertEquals(1, graph.edgesFrom(2).get(0).targetId());
     }
+
+    @Test void unknownNodesHaveNoEdgesAndReturnedEdgesAreImmutable() {
+        Graph graph = new Graph();
+        graph.addNode(7);
+
+        assertTrue(graph.contains(7));
+        assertFalse(graph.contains(8));
+        assertTrue(graph.edgesFrom(8).isEmpty());
+        assertThrows(UnsupportedOperationException.class, () -> graph.edgesFrom(7).add(new GraphEdge(8, 1, 0)));
+    }
+}

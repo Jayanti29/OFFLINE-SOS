@@ -16,3 +16,5 @@ class DatabaseManagerTest {
                 assertTrue(result.next());
             }
         } finally { Files.deleteIfExists(path); }
+    }
+}

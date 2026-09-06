@@ -10,3 +10,4 @@ class GraphEdgeTest {
 
         assertEquals(250, edge.safetyCost());
     }
+}

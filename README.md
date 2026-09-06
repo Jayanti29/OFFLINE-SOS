@@ -16,3 +16,7 @@ mvn javafx:run
 The included demo graph is explicitly **SYNTHETIC TEST DATA - NOT REAL-WORLD DATA**. Replace it only through a documented import pipeline with sourced data before using geographic claims.
 
 ## Architecture
+
+JavaFX UI -> service layer -> repositories -> local SQLite. Routing consumes a graph loaded from local records; synchronization is optional and never required for routing.
+
+The current slice includes SQLite schema initialization, coordinate/distance validation, shortest/safest/balanced Dijkstra routing, transparent offline status, and a focused JavaFX emergency workflow. See `docs/` for design notes.
