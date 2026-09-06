@@ -3,3 +3,4 @@ target/
 *.db
 *.sqlite
 .idea/
+.vscode/settings.json
