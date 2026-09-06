@@ -10,3 +10,4 @@ class DatabaseManagerTest {
         try (var database = new DatabaseManager(path)) {
             try (var result = database.connection().createStatement().executeQuery("PRAGMA foreign_keys")) {
                 assertTrue(result.next());
+                assertEquals(1, result.getInt(1));
