@@ -5,3 +5,4 @@
 .panel { -fx-background-color: white; -fx-background-radius: 10px; -fx-padding: 18px; -fx-border-color: #dce5dc; -fx-border-radius: 10px; }
 .location { -fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #17231d; }
 .muted { -fx-font-size: 12px; -fx-text-fill: #68756d; }
+.map { -fx-background-color: #dfe9df; -fx-background-radius: 10px; -fx-padding: 28px; -fx-font-size: 16px; -fx-text-fill: #30573b; -fx-border-color: #bdcfbd; -fx-border-radius: 10px; }
