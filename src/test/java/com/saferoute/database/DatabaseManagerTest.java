@@ -9,3 +9,4 @@ class DatabaseManagerTest {
         var path = Files.createTempFile("saferoute", ".db");
         try (var database = new DatabaseManager(path)) {
             try (var result = database.connection().createStatement().executeQuery("PRAGMA foreign_keys")) {
+                assertTrue(result.next());
