@@ -10,3 +10,4 @@ class GraphTest {
         Graph graph = new Graph();
         graph.addRoad(new Road(1, 1, 2, 125, 20));
 
+        assertTrue(graph.contains(1));
