@@ -13,3 +13,4 @@ public final class RouteFinder {
 
     public Route findSafestRoute(Graph graph, long start, long destination) {
         return find(graph, start, destination, GraphEdge::safetyCost, "SAFEST");
+    }
