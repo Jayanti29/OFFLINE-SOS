@@ -14,3 +14,4 @@ public final class Graph {
         adjacency.get(road.fromLocationId()).add(new GraphEdge(road.toLocationId(), road.distanceMeters(), road.riskScore()));
         adjacency.get(road.toLocationId()).add(new GraphEdge(road.fromLocationId(), road.distanceMeters(), road.riskScore()));
     }
+
