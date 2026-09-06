@@ -14,3 +14,4 @@ class ValidationTest {
     }
 
     @Test void rejectsInvalidLocationAndRoadValues() {
+        assertThrows(IllegalArgumentException.class, () -> new Location(1, "", 0, 0));
