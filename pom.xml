@@ -9,3 +9,4 @@
     <javafx.version>21.0.5</javafx.version>
     <junit.version>5.11.4</junit.version>
   </properties>
+  <dependencies>
