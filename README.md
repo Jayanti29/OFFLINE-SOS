@@ -12,3 +12,4 @@ Requirements: Java 25+ and Maven 3.9+.
 mvn clean test
 mvn javafx:run
 ```
+
