@@ -6,3 +6,4 @@ SafeRoute is an offline-first JavaFX prototype for route planning during stressf
 
 ## Run
 
+Requirements: Java 25+ and Maven 3.9+.
