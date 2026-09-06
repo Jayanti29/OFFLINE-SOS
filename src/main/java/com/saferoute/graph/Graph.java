@@ -15,3 +15,4 @@ public final class Graph {
         adjacency.get(road.toLocationId()).add(new GraphEdge(road.fromLocationId(), road.distanceMeters(), road.riskScore()));
     }
 
+    public List<GraphEdge> edgesFrom(long id) { return List.copyOf(adjacency.getOrDefault(id, List.of())); }
