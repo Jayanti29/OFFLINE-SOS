@@ -80,6 +80,7 @@ function SafeRouteDashboard() {
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState('')
   const [profileImage, setProfileImage] = useState('')
+  const [mapStyle, setMapStyle] = useState<'normal' | 'satellite'>('normal')
 
   useEffect(() => {
     if (!firebaseAuth) return undefined
@@ -93,6 +94,11 @@ function SafeRouteDashboard() {
   const liveTransitUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(locationLabel)}&destination=${encodeURIComponent(destinationInput)}&travelmode=transit`
 
   const profileLabel = user?.email || 'Jayanti Gautam'
+  const mapTilerKey = import.meta.env.VITE_MAPTILER_KEY
+  const tileUrl = mapTilerKey
+    ? `https://api.maptiler.com/maps/${mapStyle === 'satellite' ? 'hybrid' : 'streets-v2'}/{z}/{x}/{y}.jpg?key=${mapTilerKey}`
+    : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+  const tileAttribution = mapTilerKey ? '&copy; MapTiler &copy; OpenStreetMap contributors' : '&copy; OpenStreetMap contributors'
 
   async function authenticate() {
     setAuthError('')
@@ -235,18 +241,18 @@ function SafeRouteDashboard() {
       <section className="workbench">
         <div className="map-panel">
           <div className="panel-heading">
-            <div><p className="eyebrow">LIVE TILE SOURCE</p><h3>Bengaluru support map</h3></div>
-            <button className="button button-quiet" type="button" onClick={() => setRouteVisible(false)}>Clear route</button>
+            <div><p className="eyebrow">{mapTilerKey ? 'MAPTILER LIVE TILES' : 'OPENSTREETMAP LIVE TILES'}</p><h3>Bengaluru support map</h3></div>
+            <div className="map-actions"><button className={`button button-quiet ${mapStyle === 'normal' ? 'active-style' : ''}`} type="button" onClick={() => setMapStyle('normal')}>Normal</button><button className={`button button-quiet ${mapStyle === 'satellite' ? 'active-style' : ''}`} type="button" onClick={() => setMapStyle('satellite')} disabled={!mapTilerKey}>Satellite</button><button className="button button-quiet" type="button" onClick={() => setRouteVisible(false)}>Clear route</button></div>
           </div>
           <div className="map-wrap">
             <MapContainer center={mapCenter} zoom={11} scrollWheelZoom className="leaflet-map">
               <MapViewport center={mapCenter} />
-              <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <TileLayer attribution={tileAttribution} url={tileUrl} />
               {routeVisible && <Polyline positions={routeWaypoints} pathOptions={{ color: '#d64a43', weight: 5, opacity: 0.9 }} />}
               <CircleMarker center={location} radius={9} pathOptions={{ color: '#fff', weight: 3, fillColor: '#1f8a70', fillOpacity: 1 }}><Popup>Current reference: {locationLabel}</Popup></CircleMarker>
               {places.filter((place) => place.name !== origin.name).map((place) => <CircleMarker key={place.name} center={place.position} radius={7} pathOptions={{ color: '#fff', weight: 2, fillColor: markerColor[place.category], fillOpacity: 1 }}><Popup><strong>{place.name}</strong><br />{place.detail}<br /><small>Verify availability before relying on this point.</small></Popup></CircleMarker>)}
             </MapContainer>
-            <div className="map-badge">REAL OSM TILES · DATA ACCESS DEPENDS ON NETWORK</div>
+            <div className="map-badge">{mapTilerKey ? 'MAPTILER TILES · NETWORK REQUIRED' : 'OSM TILES · NETWORK REQUIRED'}</div>
           </div>
           <div className="legend"><span><i className="legend-dot route-dot" />Route</span><span><i className="legend-dot hospital-dot" />Hospital</span><span><i className="legend-dot police-dot" />Police</span><span><i className="legend-dot fire-dot" />Fire</span></div>
         </div>

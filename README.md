@@ -23,7 +23,7 @@ npm run dev
 
 Open `http://127.0.0.1:5173/` in a browser. Browser location requires permission and network access. Firebase, routing-provider, and production authentication credentials are intentionally not committed.
 
-For the optional integrations, copy `web/.env.example` to `web/.env.local` and fill in the Firebase values and Cloudinary cloud name/upload preset locally. Copy `server/.env.example` to `server/.env`, add `GEMINI_API_KEY`, then run `node server/index.mjs` from the repository root. Gemini requests stay on the server and are proxied by Vite during development.
+For the optional integrations, copy `web/.env.example` to `web/.env.local` and fill in the Firebase values, Cloudinary cloud name/upload preset, and the MapTiler token locally. The MapTiler account settings URL is not itself a token. Copy `server/.env.example` to `server/.env`, add `GEMINI_API_KEY`, then run `node server/index.mjs` from the repository root. Gemini requests stay on the server and are proxied by Vite during development.
 
 The included demo graph is explicitly **SYNTHETIC TEST DATA - NOT REAL-WORLD DATA**. Replace it only through a documented import pipeline with sourced data before using geographic claims.
 

@@ -16,6 +16,9 @@ button { cursor: pointer; }
 .full-button { width: 100%; margin-top: 10px; }
 .text-button { display: block; margin: 14px auto 0; border: 0; color: var(--green); background: transparent; font-size: 12px; font-weight: 700; }
 .auth-error { color: var(--red); font-size: 12px; }
+.map-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+.map-actions .button { padding: 7px 9px; font-size: 10px; }
+.map-actions .active-style { color: #176548; background: #e1f4e8; }
 .avatar-image { object-fit: cover; }
 .upload-button { margin-left: auto; cursor: pointer; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
