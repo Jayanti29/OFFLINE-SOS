@@ -12,3 +12,4 @@ class RouteTest {
         List<Long> locationIds = new ArrayList<>(List.of(1L, 2L));
         Route route = new Route(locationIds, 100, 75, "SAFE");
         locationIds.add(3L);
+
