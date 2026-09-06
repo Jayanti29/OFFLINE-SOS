@@ -7,3 +7,4 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RouteFinderTest {
     private Graph graph() {
+        Graph graph = new Graph();
