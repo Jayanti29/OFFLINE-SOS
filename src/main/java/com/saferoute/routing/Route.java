@@ -7,3 +7,4 @@ public record Route(List<Long> locationIds, double distanceMeters, double safety
         locationIds = List.copyOf(locationIds);
         if (locationIds.isEmpty()) throw new IllegalArgumentException("Route must contain at least one location");
     }
+}
