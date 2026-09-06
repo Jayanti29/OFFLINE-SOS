@@ -14,3 +14,4 @@ public final class DatabaseManager implements AutoCloseable {
         }
         initialize();
     }
+
