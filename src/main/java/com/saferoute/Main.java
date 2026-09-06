@@ -13,3 +13,4 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+public final class Main extends Application {
