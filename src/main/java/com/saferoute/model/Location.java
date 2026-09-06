@@ -3,3 +3,4 @@ package com.saferoute.model;
 public record Location(long id, String name, double latitude, double longitude) {
     public Location {
         if (name == null || name.isBlank()) throw new IllegalArgumentException("Location name is required");
+        if (latitude < -90 || latitude > 90) throw new IllegalArgumentException("Latitude must be between -90 and 90");
