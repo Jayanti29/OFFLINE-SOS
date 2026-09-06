@@ -9,3 +9,4 @@
 .label { -fx-text-fill: #536158; -fx-font-size: 12px; -fx-font-weight: bold; }
 .combo-box { -fx-pref-height: 44px; }
 .button { -fx-cursor: hand; }
+.emergency { -fx-background-color: #b62e2e; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 15px; -fx-background-radius: 8px; }
