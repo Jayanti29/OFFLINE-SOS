@@ -8,3 +8,4 @@ import static org.junit.jupiter.api.Assertions.*;
 class GraphTest {
     @Test void roadsAreAvailableInBothDirections() {
         Graph graph = new Graph();
+        graph.addRoad(new Road(1, 1, 2, 125, 20));
