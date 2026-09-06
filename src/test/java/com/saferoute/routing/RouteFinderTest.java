@@ -8,3 +8,4 @@ import static org.junit.jupiter.api.Assertions.*;
 class RouteFinderTest {
     private Graph graph() {
         Graph graph = new Graph();
+        graph.addRoad(new Road(1, 1, 2, 100, 80));
