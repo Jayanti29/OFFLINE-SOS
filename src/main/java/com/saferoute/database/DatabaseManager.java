@@ -6,3 +6,4 @@ import java.nio.file.Path;
 public final class DatabaseManager implements AutoCloseable {
     private final Connection connection;
 
+    public DatabaseManager(Path databasePath) throws SQLException {
