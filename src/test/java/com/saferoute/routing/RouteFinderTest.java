@@ -14,3 +14,4 @@ class RouteFinderTest {
         graph.addRoad(new Road(4, 3, 4, 130, 5));
         return graph;
     }
+
