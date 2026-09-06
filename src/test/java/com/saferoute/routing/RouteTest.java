@@ -13,3 +13,4 @@ class RouteTest {
         Route route = new Route(locationIds, 100, 75, "SAFE");
         locationIds.add(3L);
 
+        assertEquals(List.of(1L, 2L), route.locationIds());
