@@ -10,3 +10,4 @@
     <junit.version>5.11.4</junit.version>
   </properties>
   <dependencies>
+    <dependency><groupId>org.openjfx</groupId><artifactId>javafx-controls</artifactId><version>${javafx.version}</version></dependency>
