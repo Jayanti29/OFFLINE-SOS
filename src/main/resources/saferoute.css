@@ -1,14 +1,27 @@
 .root { -fx-font-family: 'Avenir Next'; -fx-background-color: #f5f7f4; -fx-text-fill: #17231d; }
+.login-root { -fx-background-color: #e8efe7; }
+.login-card { -fx-background-color: white; -fx-background-radius: 12px; -fx-border-color: #d0ddd0; -fx-border-radius: 12px; -fx-padding: 30px; -fx-effect: dropshadow(gaussian, rgba(25,55,35,0.12), 18, 0.2, 0, 5); }
+.login-title { -fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #17231d; }
 .root { -fx-font-family: 'Avenir Next'; -fx-background-color: #f5f7f4; -fx-text-fill: #17231d; }
 .eyebrow { -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #53705b; }
 .brand { -fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #17231d; }
 .offline { -fx-text-fill: #9a5b18; -fx-font-weight: bold; -fx-font-size: 12px; }
+.profile-value { -fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #24492e; }
+.tab-pane { -fx-tab-min-height: 38px; }
+.tab { -fx-font-weight: bold; }
+.text-field, .password-field, .combo-box { -fx-background-color: #fbfdfb; -fx-border-color: #cbd9cb; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 10px; }
+.secondary-button { -fx-background-color: #dbe9dc; -fx-text-fill: #24492e; -fx-font-weight: bold; -fx-padding: 10px; -fx-background-radius: 7px; }
+.alert-button { -fx-background-color: #f4dfc5; -fx-text-fill: #7a4618; -fx-font-weight: bold; -fx-padding: 10px 12px; -fx-background-radius: 7px; }
+.mode-toggle { -fx-background-color: #dbe9dc; -fx-text-fill: #24492e; -fx-font-weight: bold; -fx-padding: 10px 12px; -fx-background-radius: 7px; }
+.mode-toggle:selected { -fx-background-color: #315f9b; -fx-text-fill: white; }
 .panel { -fx-background-color: white; -fx-background-radius: 10px; -fx-padding: 18px; -fx-border-color: #dce5dc; -fx-border-radius: 10px; }
 .location { -fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #17231d; }
 .muted { -fx-font-size: 12px; -fx-text-fill: #68756d; }
 .map { -fx-background-color: #dfe9df; -fx-background-radius: 10px; -fx-padding: 28px; -fx-font-size: 16px; -fx-text-fill: #30573b; -fx-border-color: #bdcfbd; -fx-border-radius: 10px; }
 .map-frame { -fx-background-color: #e6eee4; -fx-background-radius: 10px; -fx-border-color: #bdcfbd; -fx-border-radius: 10px; -fx-min-height: 390px; }
 .map-title { -fx-background-color: rgba(255,255,255,0.88); -fx-background-radius: 6px; -fx-padding: 8px 10px; -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #30573b; }
+.map-toggle { -fx-background-color: #edf4ed; -fx-text-fill: #31533a; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 8px; -fx-background-radius: 6px; -fx-border-color: #d5e2d5; -fx-border-radius: 6px; }
+.map-toggle:selected { -fx-background-color: #315f9b; -fx-text-fill: white; }
 .label { -fx-text-fill: #536158; -fx-font-size: 12px; -fx-font-weight: bold; }
 .combo-box { -fx-pref-height: 44px; }
 .button { -fx-cursor: hand; }
