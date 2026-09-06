@@ -4,3 +4,4 @@ import java.sql.*;
 import java.nio.file.Path;
 
 public final class DatabaseManager implements AutoCloseable {
+    private final Connection connection;
