@@ -12,3 +12,4 @@ public final class DatabaseManager implements AutoCloseable {
             statement.execute("PRAGMA foreign_keys = ON");
             statement.execute("PRAGMA busy_timeout = 5000");
         }
+        initialize();
