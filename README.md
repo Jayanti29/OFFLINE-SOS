@@ -27,6 +27,8 @@ For the optional integrations, copy `web/.env.example` to `web/.env.local` and f
 
 The included demo graph is explicitly **SYNTHETIC TEST DATA - NOT REAL-WORLD DATA**. Replace it only through a documented import pipeline with sourced data before using geographic claims.
 
+For the React web dashboard's detailed architecture, use cases, state chart, deployment, and workflows, see [Web System Design](docs/WEB_SYSTEM_DESIGN.md).
+
 ## Architecture
 
 JavaFX UI -> service layer -> repositories -> local SQLite. Routing consumes a graph loaded from local records; synchronization is optional and never required for routing.

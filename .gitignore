@@ -12,3 +12,4 @@ target/
 !server/.env.example
 web/node_modules/
 web/dist/
+.vercel

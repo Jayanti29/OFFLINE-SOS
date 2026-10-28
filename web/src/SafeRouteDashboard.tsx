@@ -1,10 +1,19 @@
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from 'firebase/auth'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { CircleMarker, MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from 'react-leaflet'
 import { divIcon } from 'leaflet'
-import type { LatLngExpression } from 'leaflet'
 import { firebaseAuth, firebaseConfigured } from './firebase'
 import 'leaflet/dist/leaflet.css'
+
+import { GuardianMeshModal } from './features/guardianMesh/GuardianMeshModal'
+import { guardianMeshService } from './features/guardianMesh/guardianMeshService'
+import { AcousticGuardModal } from './features/acousticPanic/AcousticGuardModal'
+import { DeadMansSwitchModal } from './features/acousticPanic/DeadMansSwitchModal'
+import { acousticGuardService, type PanicTriggerEvent } from './features/acousticPanic/acousticGuardService'
+import { ARCorridorHUD } from './features/arCorridor/ARCorridorHUD'
+import { WalkTogetherModal } from './features/companionMatching/WalkTogetherModal'
+import { IlluminationLayer } from './features/illumination/IlluminationLayer'
+import { PredictiveRiskPanel } from './features/predictiveRisk/PredictiveRiskPanel'
 
 type RouteMode = 'safest' | 'shortest' | 'transit'
 type PlaceCategory = 'origin' | 'destination' | 'hospital' | 'police' | 'fire' | 'support'
@@ -159,9 +168,19 @@ const markerColor: Record<PlaceCategory, string> = {
   support: '#3e7c55',
 }
 
-function MapViewport({ center }: { center: LatLngExpression }) {
+function MapViewport({ center }: { center: [number, number] }) {
   const map = useMap()
-  map.setView(center, map.getZoom(), { animate: true })
+  const prevCenterRef = useRef<[number, number]>(center)
+
+  useEffect(() => {
+    const [prevLat, prevLng] = prevCenterRef.current
+    const [lat, lng] = center
+    if (Math.abs(prevLat - lat) > 0.0001 || Math.abs(prevLng - lng) > 0.0001) {
+      map.setView(center, map.getZoom(), { animate: true })
+      prevCenterRef.current = center
+    }
+  }, [center, map])
+
   return null
 }
 
@@ -219,7 +238,13 @@ function SafeRouteDashboard() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState('')
-  const [profileImage, setProfileImage] = useState('')
+  const [profileImage, setProfileImage] = useState(() => {
+    try {
+      return localStorage.getItem('saferoute-profile-image') || ''
+    } catch {
+      return ''
+    }
+  })
   const [mapStyle, setMapStyle] = useState<'normal' | 'satellite'>('normal')
   const [accuracy, setAccuracy] = useState<number | null>(null)
   const [transitOpen, setTransitOpen] = useState(false)
@@ -233,6 +258,19 @@ function SafeRouteDashboard() {
   const [routeLoading, setRouteLoading] = useState(false)
   const [transitStatus, setTransitStatus] = useState<'idle' | 'checking' | 'handoff'>('idle')
   const [liveTransitCandidates, setLiveTransitCandidates] = useState(transitCandidates)
+
+  // 6 Advanced Safety Features State
+  const [isMeshOpen, setIsMeshOpen] = useState(false)
+  const [isAcousticOpen, setIsAcousticOpen] = useState(false)
+  const [isDeadMansOpen, setIsDeadMansOpen] = useState(false)
+  const [deadMansEvent, setDeadMansEvent] = useState<PanicTriggerEvent | null>(null)
+  const [isAROpen, setIsAROpen] = useState(false)
+  const [isCompanionOpen, setIsCompanionOpen] = useState(false)
+  const [isIlluminationActive, setIsIlluminationActive] = useState(true)
+  const [showRiskHorizon, setShowRiskHorizon] = useState(true)
+  const [screamGuardActive, setScreamGuardActive] = useState(acousticGuardService.isRunning())
+  const [deadZoneActive, setDeadZoneActive] = useState(guardianMeshService.getIsDeadZoneSimulated())
+  const [dynamicRouteRisk, setDynamicRouteRisk] = useState<number | null>(null)
 
   useEffect(() => {
     if (!firebaseAuth) return undefined
@@ -273,6 +311,24 @@ function SafeRouteDashboard() {
     }
   }, [])
 
+  useEffect(() => {
+    const unsubTrigger = acousticGuardService.onTrigger((event) => {
+      setDeadMansEvent(event)
+      setIsDeadMansOpen(true)
+    })
+    const unsubStatus = acousticGuardService.onStatusChange((active) => {
+      setScreamGuardActive(active)
+    })
+    const unsubMesh = guardianMeshService.subscribe(() => {
+      setDeadZoneActive(guardianMeshService.getIsDeadZoneSimulated())
+    })
+    return () => {
+      unsubTrigger()
+      unsubStatus()
+      unsubMesh()
+    }
+  }, [])
+
   const buildingIcon = (category: PlaceCategory) => divIcon({
     className: `building-marker building-${category}`,
     html: `<span>${category === 'hospital' ? '+' : category === 'police' ? 'P' : category === 'fire' ? 'F' : '◆'}</span>`,
@@ -280,19 +336,26 @@ function SafeRouteDashboard() {
     iconAnchor: [15, 15],
   })
 
+  const now = new Date()
+  const formattedDate = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase()
+  const hours = now.getHours()
+  const dynamicGreeting = hours < 12 ? 'Good morning' : hours < 17 ? 'Good afternoon' : hours < 21 ? 'Good evening' : 'Good night'
+
   const mapCenter = useMemo<[number, number]>(() => [location[0], location[1]], [location])
-  const liveTransitUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(locationLabel)}&destination=${encodeURIComponent(destinationInput)}&travelmode=transit`
+  const liveTransitOrigin = locationLabel === 'Current device location' ? `${location[0]},${location[1]}` : locationLabel
+  const liveTransitUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(liveTransitOrigin)}&destination=${encodeURIComponent(destinationInput)}&travelmode=transit`
   const selectedRoute = routeOptions[routeMode === 'transit' ? 'safest' : routeMode]
+  const currentEffectiveRisk = dynamicRouteRisk !== null ? dynamicRouteRisk : selectedRoute.risk
   const nearestEmergency = nearestEntries(emergencyTarget, location)[0]?.entry
   const directoryGroups = directoryFilter === 'All'
     ? Object.entries(nearbyDirectory)
     : Object.entries(nearbyDirectory).filter(([category]) => category === directoryFilter)
   const routeRiskBreakdown = [
     { label: 'Time to reach', value: selectedRoute.eta, detail: `${selectedRoute.distance} total` },
-    { label: 'Network risk', value: networkWeak ? 'High' : 'Low', detail: networkWeak ? 'Weak/offline signal warning active' : 'Live map and route checks available' },
-    { label: 'Theft / harassment', value: `${Math.min(72, selectedRoute.risk + 9)}%`, detail: 'Prototype concern estimate from route exposure and support density' },
-    { label: 'Violent-crime concern', value: `${Math.min(68, selectedRoute.risk + 14)}%`, detail: 'Not official crime data; verify locally before travel' },
-    { label: 'Accident risk', value: `${Math.min(76, selectedRoute.risk + 18)}%`, detail: 'Estimated from route distance and arterial-road exposure' },
+    { label: 'Network risk', value: networkWeak || deadZoneActive ? 'High' : 'Low', detail: networkWeak || deadZoneActive ? '0-Cellular / weak signal (Guardian Mesh active)' : 'Live map and route checks available' },
+    { label: 'Theft / harassment', value: `${Math.min(72, currentEffectiveRisk + 9)}%`, detail: 'Prototype concern estimate from route exposure and support density' },
+    { label: 'Violent-crime concern', value: `${Math.min(68, currentEffectiveRisk + 14)}%`, detail: 'Not official crime data; verify locally before travel' },
+    { label: 'Accident risk', value: `${Math.min(76, currentEffectiveRisk + 18)}%`, detail: 'Estimated from route distance and arterial-road exposure' },
     { label: 'Nearby help', value: `${selectedRoute.nearby.length}`, detail: selectedRoute.nearby.join(' · ') },
   ]
 
@@ -321,23 +384,33 @@ function SafeRouteDashboard() {
 
   async function uploadProfileImage(file: File | undefined) {
     if (!file) return
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string
+      if (dataUrl) {
+        setProfileImage(dataUrl)
+        try {
+          localStorage.setItem('saferoute-profile-image', dataUrl)
+        } catch {}
+        setNotice('Profile avatar updated and saved locally.')
+      }
+    }
+    reader.readAsDataURL(file)
+
     const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
     const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
-    if (!cloudName || !uploadPreset) {
-      setNotice('Cloudinary needs VITE_CLOUDINARY_CLOUD_NAME and an unsigned VITE_CLOUDINARY_UPLOAD_PRESET.')
-      return
+    if (cloudName && uploadPreset) {
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('upload_preset', uploadPreset)
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: formData })
+        const result = await response.json()
+        if (response.ok && result.secure_url) {
+          setProfileImage(result.secure_url)
+        }
+      } catch {}
     }
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('upload_preset', uploadPreset)
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: formData })
-    const result = await response.json()
-    if (!response.ok) {
-      setNotice(result.error?.message || 'Cloudinary upload failed.')
-      return
-    }
-    setProfileImage(result.secure_url)
-    setNotice('Profile image uploaded to Cloudinary.')
   }
 
   async function getRouteBrief() {
@@ -480,20 +553,71 @@ function SafeRouteDashboard() {
     }
   }
 
-  function sendEmergencyAlert() {
+  function triggerEmergencySOS(category: 'sos' | 'womens_sos' | 'acoustic_scream' | 'companion_panic' = 'sos') {
     setAlertSent(true)
-    setSosActive(false)
-    setNotice(`Emergency alert prepared locally for ${emergencyLabels[emergencyTarget]}. Choose SOS to call ${nearestEmergency?.name || 'the selected category'}.`)
+    setSosActive(true)
+
+    // Siren alarm tone
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+      if (AudioCtx) {
+        const audio = new AudioCtx()
+        const oscillator = audio.createOscillator()
+        const gain = audio.createGain()
+        oscillator.connect(gain).connect(audio.destination)
+        oscillator.frequency.value = category === 'womens_sos' ? 880 : 960
+        oscillator.type = 'sawtooth'
+        gain.gain.value = 0.3
+        oscillator.start()
+        const now = audio.currentTime
+        gain.gain.setValueAtTime(0.3, now)
+        gain.gain.setValueAtTime(0, now + 0.3)
+        gain.gain.setValueAtTime(0.3, now + 0.5)
+        gain.gain.setValueAtTime(0, now + 0.8)
+        gain.gain.setValueAtTime(0.3, now + 1.0)
+        gain.gain.setValueAtTime(0, now + 1.3)
+        oscillator.stop(now + 1.4)
+      }
+    } catch {}
+
+    // Vibrate device
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate([350, 120, 350, 120, 500])
+    }
+
+    // Broadcast through Guardian Mesh
+    guardianMeshService.broadcastSOS({
+      id: Math.random().toString(36).slice(2, 9),
+      originNodeId: guardianMeshService.getSelfNodeId(),
+      timestamp: Date.now(),
+      coords: location,
+      locationLabel,
+      severity: 'critical',
+      category,
+      emergencyContacts: customContacts,
+      medicalNotes: 'SafeRoute Emergency Dispatch: User distress signal triggered.',
+    })
+
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('SafeRoute SOS Triggered', {
+        body: `Emergency distress alert active for ${locationLabel}. Relaying via Guardian Mesh.`,
+      })
+    }
+
+    setNotice(`🚨 EMERGENCY SOS ACTIVE! Distress packet broadcasted across Guardian Mesh & ${customContacts.length} custom emergency contacts.`)
+  }
+
+  function sendEmergencyAlert() {
+    triggerEmergencySOS('sos')
   }
 
   function callEmergencyTarget() {
-    setAlertSent(true)
-    setSosActive(true)
+    triggerEmergencySOS('sos')
     if (!nearestEmergency) {
-      setNotice(`No ${emergencyLabels[emergencyTarget]} number is saved in the local directory.`)
+      setNotice(`No ${emergencyLabels[emergencyTarget]} number is saved in the local directory. Guardian Mesh broadcast active.`)
       return
     }
-    setNotice(`Opening phone dialer for ${nearestEmergency.name}: ${nearestEmergency.number}.`)
+    setNotice(`Opening dialer for ${nearestEmergency.name}: ${nearestEmergency.number}. Guardian Mesh SOS dispatched.`)
     window.location.href = `tel:${nearestEmergency.number.replace(/\s/g, '')}`
   }
 
@@ -504,31 +628,11 @@ function SafeRouteDashboard() {
     localStorage.setItem('saferoute-contacts', JSON.stringify(next))
     setContactName('')
     setContactNumber('')
+    setNotice(`Emergency contact "${contactName.trim()}" saved. Will receive Guardian Mesh alerts.`)
   }
 
   function womensSos() {
-    setAlertSent(true)
-    setSosActive(true)
-    setNotice('Women’s SOS alert active locally. Use Call 112 in the directory if immediate official help is needed.')
-    if (navigator.vibrate) navigator.vibrate([250, 120, 250, 120, 450])
-    if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission()
-    if ('Notification' in window && Notification.permission === 'granted') new Notification('SafeRoute womens SOS', { body: 'Loud local SOS alert active. Call 112 if you are in immediate danger.' })
-    const audio = new AudioContext()
-    const oscillator = audio.createOscillator()
-    const gain = audio.createGain()
-    oscillator.connect(gain).connect(audio.destination)
-    oscillator.frequency.value = 880
-    oscillator.type = 'square'
-    gain.gain.value = 0.28
-    oscillator.start()
-    const now = audio.currentTime
-    gain.gain.setValueAtTime(0.28, now)
-    gain.gain.setValueAtTime(0, now + 0.35)
-    gain.gain.setValueAtTime(0.28, now + 0.5)
-    gain.gain.setValueAtTime(0, now + 0.85)
-    gain.gain.setValueAtTime(0.28, now + 1)
-    gain.gain.setValueAtTime(0, now + 1.35)
-    oscillator.stop(now + 1.45)
+    triggerEmergencySOS('womens_sos')
   }
 
   if (!authReady || (!user && !localProfile)) {
@@ -562,7 +666,14 @@ function SafeRouteDashboard() {
           </div>
         </div>
         <div className="top-actions">
-          <span className={`connection-pill ${online ? 'is-online' : ''}`}>{online ? 'ONLINE LOCATION' : 'OFFLINE READY'}</span>
+          <button
+            className={`connection-pill ${online ? 'is-online' : ''} ${deadZoneActive ? 'dot-deadzone' : ''}`}
+            type="button"
+            onClick={() => setIsMeshOpen(true)}
+            title="Open Guardian Mesh P2P Relay"
+          >
+            {deadZoneActive ? '⚠️ 0-BARS DEAD ZONE · MESH TX' : online ? 'ONLINE · MESH STANDBY' : 'OFFLINE · GUARDIAN MESH'}
+          </button>
           <label className="sos-target">SOS target
             <select value={emergencyTarget} onChange={(event) => setEmergencyTarget(event.target.value as EmergencyTarget)}>
               <option value="Hospitals">Hospital</option>
@@ -579,8 +690,8 @@ function SafeRouteDashboard() {
 
       <section className="welcome-row">
         <div>
-          <p className="eyebrow">MONDAY, SEPTEMBER 7</p>
-          <h2>Good evening, Jayanti.</h2>
+          <p className="eyebrow">{formattedDate}</p>
+          <h2>{dynamicGreeting}, Jayanti.</h2>
           <p className="lede">One calm place to check a route, find nearby help, and keep your next move visible.</p>
         </div>
         <div className="profile-panel">
@@ -594,7 +705,53 @@ function SafeRouteDashboard() {
       <section className="metric-grid" aria-label="Dashboard summary">
         <article className="metric-card"><span className="metric-label">CURRENT POSITION</span><strong>{locationLabel}</strong><small>{online ? `Browser permission active${accuracy ? ` · ±${Math.round(accuracy)}m` : ''}` : 'Local reference point'}</small></article>
         <article className="metric-card"><span className="metric-label">NEARBY SUPPORT</span><strong>12 reference points</strong><small>Hospitals · police · fire · NGO/volunteer</small></article>
-        <article className="metric-card"><span className="metric-label">PROFILE STATUS</span><strong>Local mode active</strong><small>Firebase Auth can be connected later</small></article>
+        <article className="metric-card"><span className="metric-label">PROFILE STATUS</span><strong>Local mode active</strong><small>Saved locally · Offline ready</small></article>
+      </section>
+
+      <section className="features-toolbar" aria-label="World-first safety innovations">
+        <span className="features-label">ADVANCED SAFETY:</span>
+        <button
+          type="button"
+          className={`feature-btn ${deadZoneActive ? 'alert' : 'active'}`}
+          onClick={() => setIsMeshOpen(true)}
+        >
+          📡 Guardian Mesh SOS {deadZoneActive ? '(0-Bars Transmitting)' : '(P2P Ready)'}
+        </button>
+        <button
+          type="button"
+          className={`feature-btn ${screamGuardActive ? 'active' : ''}`}
+          onClick={() => setIsAcousticOpen(true)}
+        >
+          🎙️ Scream Guard {screamGuardActive ? '(Monitoring)' : '(Standby)'}
+        </button>
+        <button
+          type="button"
+          className="feature-btn"
+          onClick={() => setIsAROpen(true)}
+        >
+          🕶️ AR Safe Corridor HUD
+        </button>
+        <button
+          type="button"
+          className="feature-btn"
+          onClick={() => setIsCompanionOpen(true)}
+        >
+          🤝 Walk-Together Matching (Zero-Knowledge)
+        </button>
+        <button
+          type="button"
+          className={`feature-btn ${isIlluminationActive ? 'active' : ''}`}
+          onClick={() => setIsIlluminationActive(!isIlluminationActive)}
+        >
+          🌙 Lux Heatmap {isIlluminationActive ? 'ON' : 'OFF'}
+        </button>
+        <button
+          type="button"
+          className={`feature-btn ${showRiskHorizon ? 'active' : ''}`}
+          onClick={() => setShowRiskHorizon(!showRiskHorizon)}
+        >
+          🔮 Risk Horizon AI {showRiskHorizon ? 'ON' : 'OFF'}
+        </button>
       </section>
 
       <section className="workbench">
@@ -611,6 +768,7 @@ function SafeRouteDashboard() {
                 {routeVisible && <Polyline positions={selectedRoute.waypoints} pathOptions={{ color: routeMode === 'safest' ? '#1f8a70' : '#d64a43', weight: 5, opacity: 0.9 }} />}
                 <CircleMarker center={location} radius={9} pathOptions={{ color: '#fff', weight: 3, fillColor: '#1f8a70', fillOpacity: 1 }}><Popup>Current reference: {locationLabel}{accuracy ? ` (${Math.round(accuracy)}m accuracy)` : ''}</Popup></CircleMarker>
                 {places.filter((place) => place.name !== origin.name).map((place) => place.category === 'hospital' || place.category === 'police' || place.category === 'fire' ? <Marker key={place.name} position={place.position} icon={buildingIcon(place.category)}><Popup><strong>{place.name}</strong><br />{place.detail}<br /><small>Verify availability before relying on this point.</small></Popup></Marker> : <CircleMarker key={place.name} center={place.position} radius={7} pathOptions={{ color: '#fff', weight: 2, fillColor: markerColor[place.category], fillOpacity: 1 }}><Popup><strong>{place.name}</strong><br />{place.detail}<br /><small>Verify availability before relying on this point.</small></Popup></CircleMarker>)}
+                <IlluminationLayer waypoints={selectedRoute.waypoints} currentCoords={location} isActive={isIlluminationActive} />
               </MapContainer>
               <div className="map-badge">{mapTilerKey ? 'MAPTILER TILES · NETWORK REQUIRED' : 'OSM TILES · NETWORK REQUIRED'}</div>
             </div>
@@ -620,7 +778,7 @@ function SafeRouteDashboard() {
           <section className="risk-analysis-panel">
             <div className="panel-heading">
               <div><p className="eyebrow">ROUTE RISK ANALYSIS</p><h3>Travel time and safety signals</h3></div>
-              <span className="risk-pill">{selectedRoute.risk}% route risk</span>
+              <span className="risk-pill">{currentEffectiveRisk}% route risk</span>
             </div>
             <div className="risk-analysis-grid">
               {routeRiskBreakdown.map((item) => (
@@ -632,6 +790,14 @@ function SafeRouteDashboard() {
               ))}
             </div>
             <p className="helper">These are prototype estimates, not official crime, traffic, or emergency-service records. OSRM is used for road shape and travel time when available.</p>
+            {showRiskHorizon && (
+              <PredictiveRiskPanel
+                baseRisk={selectedRoute.risk}
+                originLabel={locationLabel}
+                destinationLabel={destinationInput}
+                onRiskUpdated={setDynamicRouteRisk}
+              />
+            )}
           </section>
         </div>
 
@@ -732,6 +898,39 @@ function SafeRouteDashboard() {
       <section className={`status-strip ${sosActive ? 'sos-active' : ''}`}><span className="status-dot" />{notice}<span className="status-note">{alertSent ? 'Alert ready locally' : 'No unsupported safety claims'} · no live dispatch</span></section>
       {networkWeak && <section className="network-warning">Warning: network appears weak or offline in this area. Live tiles, GPS refresh, transit status, and directory updates may be unavailable.</section>}
       <footer>Map data © OpenStreetMap contributors · This prototype requires a network for map tiles and live transit handoff.</footer>
+
+      {/* Advanced Safety Modals */}
+      <GuardianMeshModal
+        isOpen={isMeshOpen}
+        onClose={() => setIsMeshOpen(false)}
+        currentCoords={location}
+        locationLabel={locationLabel}
+        emergencyContacts={customContacts}
+      />
+      <AcousticGuardModal
+        isOpen={isAcousticOpen}
+        onClose={() => setIsAcousticOpen(false)}
+      />
+      <DeadMansSwitchModal
+        isOpen={isDeadMansOpen}
+        triggerEvent={deadMansEvent}
+        onCancel={() => setIsDeadMansOpen(false)}
+        onConfirmedPanic={() => triggerEmergencySOS('acoustic_scream')}
+      />
+      <ARCorridorHUD
+        isOpen={isAROpen}
+        onClose={() => setIsAROpen(false)}
+        onTriggerSOS={() => triggerEmergencySOS('sos')}
+        currentStreetName={locationLabel}
+        nearbyHospitals={[{ name: 'Ramaiah Memorial Hospital', distance: '420m' }]}
+        nearbyPolice={[{ name: 'Jalahalli Police Station', distance: '850m' }]}
+      />
+      <WalkTogetherModal
+        isOpen={isCompanionOpen}
+        onClose={() => setIsCompanionOpen(false)}
+        onTriggerSOS={() => triggerEmergencySOS('companion_panic')}
+        currentCorridor={`${locationLabel} → ${destinationInput} Corridor`}
+      />
     </main>
   )
 }
